@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity({ name: 'entries' })
 export class PhonebookEntry {
@@ -12,11 +13,14 @@ export class PhonebookEntry {
   modificationDate: Date;
 
   @Column({unique: true})
+  @IsNotEmpty()
   name: string;
 
   @Column()
+  @IsNotEmpty()
   fullAddress: string;
 
   @Column()
+  @IsNotEmpty()
   phoneNumber: string;
 }
