@@ -8,9 +8,9 @@
   "synchronize": true,
   "logging": false,
   "entities": [
-     "src/entities/**/*.ts"
+     "build/entities/**/*.js"
   ],
   "migrations": [
-     "src/migrations/**/*.ts"
+     "migrations/**/*.ts"
   ]
 }

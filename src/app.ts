@@ -1,16 +1,20 @@
 import "reflect-metadata";
 import { createExpressServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
-import { PhoneBookController } from "./controllers/PhoneBookController";
+import { PhonebookController } from "./controllers/PhonebookController";
+import { createConnection, useContainer as ormUseContainer } from "typeorm";
 
 useContainer(Container);
+ormUseContainer(Container);
 
 const expressApp = createExpressServer({
   controllers: [
-    PhoneBookController
+    PhonebookController
   ]
 });
 
-expressApp.listen(3000);
+createConnection().then(() => {
+  expressApp.listen(3000);
 
-console.log("Server is up and running at port 3000");
+  console.log("Server is up and running at port 3000");
+})
