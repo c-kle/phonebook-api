@@ -1,26 +1,26 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { IsEmail, MinLength, Allow } from 'class-validator';
+import { Allow, IsEmail, MinLength } from "class-validator";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Entity({ name: 'users' })
+@Entity({ name: "users" })
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @CreateDateColumn()
-  creationDate: Date;
+  public creationDate: Date;
 
   @UpdateDateColumn()
-  modificationDate: Date;
+  public modificationDate: Date;
 
   @Column({ unique: true, nullable: false })
   @IsEmail()
-  email: string;
+  public email: string;
 
   @Column({ nullable: false })
   @MinLength(8)
-  password: string;
+  public password: string;
 
   @Allow()
   @Column({ nullable: false })
-  salt: string;
+  public salt: string;
 }

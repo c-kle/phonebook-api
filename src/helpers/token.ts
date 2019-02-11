@@ -1,15 +1,15 @@
-import * as jwt from 'jsonwebtoken';
-import { User } from '../entities/User';
-import { pipe, split, pathOr, ifElse, last } from 'ramda';
-import { UnauthorizedError, BadRequestError } from 'routing-controllers';
-import { isNotEmpty } from '.';
+import * as jwt from "jsonwebtoken";
+import { ifElse, last, pathOr, pipe, split } from "ramda";
+import { BadRequestError, UnauthorizedError } from "routing-controllers";
+import { isNotEmpty } from ".";
+import { User } from "../entities/User";
 
-const SECRET = 'SOME_SECRET';
-const BEARER_STR = 'Bearer ';
+const SECRET = "SOME_SECRET";
+const BEARER_STR = "Bearer ";
 
 export const checkToken = (req: any, res: any, next?: (err?: any) => any) => {
   return pipe(
-    pathOr('', ['headers', 'authorization']),
+    pathOr("", ["headers", "authorization"]),
     split(BEARER_STR),
     last,
     ifElse(
@@ -24,9 +24,9 @@ export const checkToken = (req: any, res: any, next?: (err?: any) => any) => {
       }),
       () => {
         res.status(400);
-        return res.send(new BadRequestError('token is missing'));
-      }
-    )
+        return res.send(new BadRequestError("token is missing"));
+      },
+    ),
   )(req);
 };
 

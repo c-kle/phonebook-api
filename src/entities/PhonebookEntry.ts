@@ -1,26 +1,26 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from "class-validator";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Entity({ name: 'entries' })
+@Entity({ name: "entries" })
 export class PhonebookEntry {
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @CreateDateColumn()
-  creationDate: Date;
+  public creationDate: Date;
 
   @UpdateDateColumn()
-  modificationDate: Date;
+  public modificationDate: Date;
 
   @Column({unique: true})
   @IsNotEmpty()
-  name: string;
+  public name: string;
 
   @Column()
   @IsNotEmpty()
-  fullAddress: string;
+  public fullAddress: string;
 
   @Column()
   @IsNotEmpty()
-  phoneNumber: string;
+  public phoneNumber: string;
 }
