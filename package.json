@@ -4,10 +4,10 @@
   "description": "",
   "scripts": {
     "lint": "tslint -p . -c tslint.json",
-    "start": "npm run build && node ./build/app.js",
-    "start:watch": "npm run build:watch & nodemon ./build/app.js",
     "build": "rm -rf ./build && tsc",
     "build:watch": "npm run build -- -w",
+    "start": "npm run build && node ./build/app.js",
+    "start:watch": "npm run build:watch & nodemon ./build/app.js",
     "docker:start": "docker-compose run --service-ports --rm -v $(pwd):/app api npm run start",
     "docker:start:watch": "docker-compose run --rm -v $(pwd):/app api npm run start:watch",
     "docker:test": "docker-compose run -u root --rm -v $(pwd):/app api npm run test"
@@ -29,9 +29,9 @@
     "jsonwebtoken": "8.4.0",
     "multer": "^1.4.1",
     "mysql2": "^1.6.4",
-    "ramda": "^0.25.0",
-    "reflect-metadata": "^0.1.12",
-    "routing-controllers": "^0.7.7",
+    "ramda": "0.25.0",
+    "reflect-metadata": "0.1.12",
+    "routing-controllers": "0.7.7",
     "typedi": "0.7.2",
     "typeorm": "0.2.9",
     "typeorm-typedi-extensions": "0.2.1"
