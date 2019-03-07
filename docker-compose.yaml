@@ -1,6 +1,8 @@
 version: "3"
 services:
   api:
+    environment:
+      JWT_SECRET: $JWT_SECRET
     build: .
     volumes:
       - .:/app

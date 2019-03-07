@@ -3,6 +3,7 @@ import { Inject, Service } from "typedi";
 
 import { when } from "ramda";
 import { IAuthService } from "../../interfaces/IAuth.service";
+import { AuthTokenResource } from "../../resources/AuthTokenResource";
 import { REGISTRATION, UserResouce } from "../../resources/UserResource";
 import { isNotNil } from "../../shared";
 import { authServiceToken } from "../../shared/serviceTokens";
@@ -34,7 +35,7 @@ export class AuthController {
       },
     })
     user: UserResouce,
-  ): Promise<UserResouce> {
+  ): Promise<AuthTokenResource> {
     console.log("sssssssssssssssssss", {user})
     const registerUser = () => this.service.register(user);
     const throwUserAlreadyExists = () => Promise.reject(new BadRequestError("user already exists"));

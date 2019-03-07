@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/c-kle/phonebook-api#readme",
   "dependencies": {
-    "class-transformer": "^0.2.0",
     "class-transformer-validator": "^0.6.0",
     "jsonwebtoken": "8.4.0",
     "koa": "^2.7.0",

@@ -2,9 +2,8 @@ import * as jwt from "jsonwebtoken";
 import { ifElse, last, pathOr, pipe, split } from "ramda";
 import { BadRequestError, UnauthorizedError } from "routing-controllers";
 import { isNotEmpty } from ".";
-import { UserEntity } from "../entities/UserEntity";
 
-const SECRET = "SOME_SECRET";
+const SECRET = process.env.JWT_SECRET;
 const BEARER_STR = "Bearer ";
 
 export const checkToken = (req: any, res: any, next?: (err?: any) => any) => {
@@ -30,4 +29,4 @@ export const checkToken = (req: any, res: any, next?: (err?: any) => any) => {
   )(req);
 };
 
-export const createToken = (payloadObj: UserEntity) => jwt.sign({ ...payloadObj }, SECRET);
+export const createToken = (payloadObj: any) => jwt.sign({ ...payloadObj }, SECRET);

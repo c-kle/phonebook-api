@@ -1,3 +1,4 @@
+import { AuthTokenResource } from "../resources/AuthTokenResource";
 import { UserResouce } from "../resources/UserResource";
 
 export interface IAuthService {
@@ -5,7 +6,7 @@ export interface IAuthService {
    * Registers a new user
    * @param user The user data to register
    */
-  register(user: UserResouce): Promise<UserResouce>;
+  register(user: UserResouce): Promise<AuthTokenResource>;
 
   /**
    * Finds a user with the given email
