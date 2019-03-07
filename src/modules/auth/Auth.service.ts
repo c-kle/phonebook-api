@@ -1,20 +1,21 @@
-import { __, assoc, merge, pick, pipe, prop } from "ramda";
+import { __,
+  // assoc,
+  merge, pick, pipe, prop } from "ramda";
 import { Service } from "typedi";
-import { Repository } from "typeorm";
-import { InjectRepository } from "typeorm-typedi-extensions";
+import { Repository, Transaction, TransactionRepository } from "typeorm";
 import { UserEntity } from "../../entities/UserEntity";
 import { IAuthService } from "../../interfaces/IAuth.service";
-import { AuthTokenResource } from "../../resources/AuthTokenResource";
-import { UserResouce } from "../../resources/UserResource";
+// import { AuthTokenResource } from "../../resources/AuthTokenResource";
+import { BasicUserResource, toBasicUser, UserResouce } from "../../resources/UserResource";
 import { PasswordHelper, PasswordObj } from "../../shared/password";
 import { authServiceToken } from "../../shared/serviceTokens";
-import { createToken } from "../../shared/token";
+// import { createToken } from "../../shared/token";
 
-const createTokenFromUser = pipe<UserEntity, Partial<UserEntity>, string, AuthTokenResource>(
-  pick([ "id", "email" ]),
-  createToken,
-  assoc("token", __, {}),
-);
+// const createTokenFromUser = pipe<UserEntity, Partial<UserEntity>, string, AuthTokenResource>(
+//   pick([ "id", "email" ]),
+//   createToken,
+//   assoc("token", __, {}),
+// );
 
 const prepareUser = (user: UserResouce) => (
   pipe<UserResouce, string, PasswordObj, Partial<UserEntity>, Partial<UserEntity>>(
@@ -30,22 +31,18 @@ const prepareUser = (user: UserResouce) => (
 
 @Service(authServiceToken)
 export class AuthService implements IAuthService {
-  constructor(
-    @InjectRepository(UserEntity)
-    private readonly repository: Repository<UserEntity>,
-  ) { }
-
-  public register(user: UserResouce): Promise<AuthTokenResource> {
-    return pipe<UserResouce, Partial<UserEntity>, UserEntity, Promise<UserEntity>, Promise<AuthTokenResource>>(
+  @Transaction()
+  public register(
+    user: UserResouce,
+    @TransactionRepository(UserEntity) userRepo?: Repository<UserEntity>,
+  ): Promise<BasicUserResource> {
+    return pipe<UserResouce, Partial<UserEntity>, UserEntity, Promise<BasicUserResource>>(
       prepareUser,
-      (newUser) => this.repository.create(newUser),
-      (newUser) => this.repository.save(newUser),
-      (newUserP) => newUserP.then(createTokenFromUser),
+      (newUser) => userRepo.create(newUser),
+      (newUser) => userRepo
+        .save(newUser)
+        .then(toBasicUser),
     )(user);
-  }
-
-  public findByEmail(email: string): Promise<UserResouce|undefined> {
-    return this.repository.findOne({ email });
   }
 
   // public login(user: UserResouce): Promise<string|null> {
