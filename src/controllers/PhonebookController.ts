@@ -14,11 +14,11 @@ import { Service } from "typedi";
 import { Repository } from "typeorm";
 import {InjectRepository} from "typeorm-typedi-extensions";
 
-import { PhonebookEntry } from "../entities/PhonebookEntry";
-import { isDupKeyError, success, validateOrFail } from "../helpers";
-import { checkToken } from "../helpers/token";
+import { PhonebookEntryEntity } from "../entities/PhonebookEntryEntity";
+import { isDupKeyError, success } from "../shared";
+import { checkToken } from "../shared/token";
 
-const makeSaveEntry = (repos: Repository<PhonebookEntry>) => (newEntry: PhonebookEntry) => (
+const makeSaveEntry = (repos: Repository<PhonebookEntryEntity>) => (newEntry: PhonebookEntryEntity) => (
   Promise
     .resolve(newEntry)
     .then((entry) => repos.create(entry))
@@ -34,8 +34,8 @@ const makeSaveEntry = (repos: Repository<PhonebookEntry>) => (newEntry: Phoneboo
 @JsonController("/phonebook")
 export class PhonebookController {
   constructor(
-    @InjectRepository(PhonebookEntry)
-    private readonly repository: Repository<PhonebookEntry>,
+    @InjectRepository(PhonebookEntryEntity)
+    private readonly repository: Repository<PhonebookEntryEntity>,
   ) {}
 
   @Get("/ping")
@@ -44,31 +44,31 @@ export class PhonebookController {
   }
 
   @Get("/entries")
-  public all(): Promise<PhonebookEntry[]> {
+  public all(): Promise<PhonebookEntryEntity[]> {
     return this.repository.find();
   }
 
   @Post("/entries")
   @UseBefore(checkToken)
-  public create(@Body() entry: PhonebookEntry): Promise<PhonebookEntry> {
+  public create(@Body() entry: PhonebookEntryEntity): Promise<PhonebookEntryEntity> {
     const saveEntry = makeSaveEntry(this.repository);
 
     return Promise
       .resolve(entry)
       .then(clone)
-      .then(validateOrFail)
+      // .then(validateOrFail())
       .then(saveEntry);
   }
 
   @Put("/entries/:id")
   @UseBefore(checkToken)
-  public update(@Param("id") id: number, @Body() entry: PhonebookEntry): Promise<PhonebookEntry> {
+  public update(@Param("id") id: string, @Body() entry: PhonebookEntryEntity): Promise<PhonebookEntryEntity> {
     const saveEntry = makeSaveEntry(this.repository);
     const updateEntry = () => (
       Promise
         .resolve({ ...entry, id})
         .then(clone)
-        .then(validateOrFail)
+        // .then(validateOrFail)
         .then(saveEntry)
       );
 
@@ -83,7 +83,7 @@ export class PhonebookController {
 
   @Delete("/entries/:id")
   @UseBefore(checkToken)
-  public delete(@Param("id") id: number): Promise<any> {
+  public delete(@Param("id") id: string): Promise<any> {
     const deleteEntry = () => this.repository.delete({ id });
 
     return this.repository.findOneOrFail(id)

@@ -1,5 +1,4 @@
 FROM node:10-alpine
-ADD . /app
+COPY . /app
 WORKDIR /app
-RUN npm i
-CMD ["npm", "run", "start"]
+RUN npm i -g ts-node && npm i
