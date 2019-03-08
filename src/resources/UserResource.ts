@@ -5,7 +5,7 @@ import { BaseResource } from "./BaseResource";
 export const REGISTRATION = "registration";
 export const LOGIN = "login";
 
-export class UserResouce extends BaseResource {
+export class UserResource extends BaseResource {
   @IsEmail({}, { groups: [ REGISTRATION, LOGIN ] })
   public readonly email: string;
 
@@ -13,6 +13,6 @@ export class UserResouce extends BaseResource {
   public readonly password?: string;
 }
 
-export type BasicUserResource = Pick<UserResouce, "email"|"id">;
+export type BasicUserResource = Pick<UserResource, "email"|"id">;
 
-export const toBasicUser = (user: Partial<UserResouce>): BasicUserResource => ({ id: user.id, email: user.email });
+export const toBasicUser = (user: Partial<UserResource>): BasicUserResource => ({ id: user.id, email: user.email });

@@ -1,43 +1,59 @@
-import { __,
-  // assoc,
-  merge, pick, pipe, prop } from "ramda";
+import { __, always, assoc, either, equals, ifElse, isNil, merge, not, pick, pipe, prop } from "ramda";
 import { Service } from "typedi";
 import { Repository, Transaction, TransactionRepository } from "typeorm";
+import { InjectRepository } from "typeorm-typedi-extensions";
 import { UserEntity } from "../../entities/UserEntity";
 import { IAuthService } from "../../interfaces/IAuth.service";
-// import { AuthTokenResource } from "../../resources/AuthTokenResource";
-import { BasicUserResource, toBasicUser, UserResouce } from "../../resources/UserResource";
-import { PasswordHelper, PasswordObj } from "../../shared/password";
+import { AuthTokenResource } from "../../resources/AuthTokenResource";
+import { BasicUserResource, toBasicUser, UserResource } from "../../resources/UserResource";
+import { PasswordHelper, PasswordObj } from "../../shared/PasswordHelper";
 import { authServiceToken } from "../../shared/serviceTokens";
-// import { createToken } from "../../shared/token";
+import { createToken } from "../../shared/token";
 
-// const createTokenFromUser = pipe<UserEntity, Partial<UserEntity>, string, AuthTokenResource>(
-//   pick([ "id", "email" ]),
-//   createToken,
-//   assoc("token", __, {}),
-// );
+const createTokenFromUser = pipe<UserEntity, Partial<UserEntity>, string, AuthTokenResource>(
+  pick("id"),
+  createToken,
+  assoc("token", __, {}),
+);
 
-const prepareUser = (user: UserResouce) => (
-  pipe<UserResouce, string, PasswordObj, Partial<UserEntity>, Partial<UserEntity>>(
+const prepareNewUser = (user: UserResource) => (
+  pipe<UserResource, string, PasswordObj, Partial<UserEntity>, Partial<UserEntity>>(
     prop("password"),
     (password: string) => new PasswordHelper()
       .genSalt()
       .hashPassword(password)
-      .getPasswordAndSalt(),
+      .PasswordAndSalt,
     merge(user),
     pick(["email", "password", "salt"]),
   )(user)
 );
 
+const wrongCredentials = (credsToCheck: UserResource) => (credsToCheckWith: PasswordObj) => (
+  not(
+    equals(
+      credsToCheckWith.password,
+      new PasswordHelper()
+        .useSalt(credsToCheckWith.salt)
+        .hashPassword(credsToCheck.password)
+        .Password,
+    ),
+  )
+);
+
 @Service(authServiceToken)
 export class AuthService implements IAuthService {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly usersRepository: Repository<UserEntity>,
+  ) {}
+
   @Transaction()
   public register(
-    user: UserResouce,
+    user: UserResource,
     @TransactionRepository(UserEntity) userRepo?: Repository<UserEntity>,
   ): Promise<BasicUserResource> {
-    return pipe<UserResouce, Partial<UserEntity>, UserEntity, Promise<BasicUserResource>>(
-      prepareUser,
+    return pipe<UserResource, Partial<UserEntity>, UserEntity, Promise<BasicUserResource>>(
+      prepareNewUser,
       (newUser) => userRepo.create(newUser),
       (newUser) => userRepo
         .save(newUser)
@@ -45,7 +61,15 @@ export class AuthService implements IAuthService {
     )(user);
   }
 
-  // public login(user: UserResouce): Promise<string|null> {
-
-  // }
+  public login(user: UserResource): Promise<AuthTokenResource|null> {
+    return this.usersRepository
+      .findOne({ email: user.email }, { select: [ "salt", "password", "id" ] })
+      .then(
+        ifElse(
+          either(isNil, wrongCredentials(user)),
+          always(null),
+          createTokenFromUser,
+        ),
+      );
+  }
 }
