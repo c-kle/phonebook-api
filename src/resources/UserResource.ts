@@ -1,6 +1,5 @@
 import { IsEmail, MinLength } from "class-validator";
-
-import { BaseResource } from "./BaseResource";
+import { BaseResource } from "@resources/BaseResource";
 
 export const REGISTRATION = "registration";
 export const LOGIN = "login";

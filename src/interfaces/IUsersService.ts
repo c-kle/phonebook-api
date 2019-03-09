@@ -1,4 +1,4 @@
-import { UserResource } from "../resources/UserResource";
+import { UserResource } from "@resources/UserResource";
 
 export interface IUsersService {
   /**

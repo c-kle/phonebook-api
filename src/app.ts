@@ -1,12 +1,14 @@
 import "reflect-metadata";
 
+import * as Redis from "ioredis";
 import { __, ifElse, lte, tap } from "ramda";
 import { createKoaServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
 import { createConnection, useContainer as ormUseContainer } from "typeorm";
-import { PhonebookController } from "./controllers/PhonebookController";
-// import { UserController } from "./controllers/UserController";
-import { AuthController } from "./modules/auth/Auth.controller";
+import { PhonebookController } from "@controllers/PhonebookController";
+import { currentUserChecker } from "@middlewares/currentUserChecker";
+import { AuthController } from "@modules/auth/AuthController";
+import { redisToken } from "@shared/DITokens";
 
 const MAX_RETRIES = 10;
 
@@ -19,6 +21,7 @@ const app = createKoaServer({
     PhonebookController,
     AuthController,
   ],
+  currentUserChecker,
   routePrefix: "/api",
 });
 
@@ -42,6 +45,8 @@ const connect = (nthRetry = 1): Promise<any> => (
 );
 
 connect().then(() => {
+  Container.set(redisToken, new Redis(process.env.REDIS_URL));
+
   app.listen(3000);
   console.log("App running on port 3000");
 }).catch((e) => console.error("Error caught on connect: ", e));

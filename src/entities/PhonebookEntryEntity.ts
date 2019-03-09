@@ -1,6 +1,6 @@
 import { IsNotEmpty } from "class-validator";
 import { Column, Entity } from "typeorm";
-import { BaseEntity } from "./BaseEntity";
+import { BaseEntity } from "@entities/BaseEntity";
 
 @Entity({ name: "entries" })
 export class PhonebookEntryEntity extends BaseEntity {

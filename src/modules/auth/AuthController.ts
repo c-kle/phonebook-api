@@ -1,15 +1,24 @@
-import { BadRequestError, Body, JsonController, Post, UnauthorizedError } from "routing-controllers";
+import {
+  BadRequestError,
+  Body,
+  CurrentUser,
+  Get,
+  HttpCode,
+  JsonController,
+  Post,
+  UnauthorizedError,
+} from "routing-controllers";
 import { Inject, Service } from "typedi";
 
-import { when, isNil } from "ramda";
-import { IAuthService } from "../../interfaces/IAuth.service";
-import { IUsersService } from "../../interfaces/IUsers.service";
-import { BasicUserResource, REGISTRATION, UserResource, LOGIN } from "../../resources/UserResource";
-import { isNotNil } from "../../shared";
-import { authServiceToken, usersServiceToken } from "../../shared/serviceTokens";
-import { UsersService } from "../users/Users.service";
-import { AuthService } from "./Auth.service";
-import { AuthTokenResource } from "../../resources/AuthTokenResource";
+import { isNil, when } from "ramda";
+import { IAuthService } from "@interfaces/IAuthService";
+import { IUsersService } from "@interfaces/IUsersService";
+import { AuthTokenResource } from "@resources/AuthTokenResource";
+import { BasicUserResource, LOGIN, REGISTRATION, UserResource } from "@resources/UserResource";
+import { isNotNil } from "@shared/utils";
+import { authServiceToken, usersServiceToken } from "@shared/DITokens";
+import { UsersService } from "@modules/users/UsersService";
+import { AuthService } from "@modules/auth/AuthService";
 
 @Service()
 @JsonController("/auth")
@@ -62,5 +71,11 @@ export class AuthController {
     return this.service
       .login(credentials)
       .then(when(isNil, throwUnauthorized));
+  }
+
+  @Get("/logout")
+  @HttpCode(204)
+  public logout(@CurrentUser({ required: true }) tokenObj: AuthTokenResource): Promise<any> {
+    return this.service.logout(tokenObj);
   }
 }

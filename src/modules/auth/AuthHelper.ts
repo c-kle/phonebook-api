@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { __, pipe } from "ramda";
-import { UserEntity } from "../entities/UserEntity";
+import { UserEntity } from "@entities/UserEntity";
 
 const SALT_LENGHT = 16;
 

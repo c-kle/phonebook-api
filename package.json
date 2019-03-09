@@ -5,7 +5,7 @@
   "scripts": {
     "lint": "tslint -p . -c tslint.json",
     "build": "tsc",
-    "start": "ts-node src/app.ts",
+    "start": "ts-node -r tsconfig-paths/register src/app.ts",
     "start:watch": "nodemon",
     "docker:start": "docker-compose run --rm --service-ports -v $(pwd):/app api npm run start",
     "docker:start:watch": "docker-compose run --service-ports --rm -v $(pwd):/app api npm run start:watch",
@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/c-kle/phonebook-api#readme",
   "dependencies": {
+    "@types/ioredis": "^4.0.9",
     "class-transformer-validator": "^0.6.0",
+    "ioredis": "^4.6.2",
     "jsonwebtoken": "8.4.0",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
@@ -38,14 +40,16 @@
     "typescript": "^3.1.6"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "8.3.0",
     "@types/koa": "^2.0.48",
     "@types/koa-bodyparser": "^4.2.2",
     "@types/koa-router": "^7.0.39",
     "@types/node": "^10.7.1",
-    "@types/jsonwebtoken": "8.3.0",
     "@types/ramda": "github:types/npm-ramda#dist",
     "nodemon": "1.14.11",
+    "ts-node": "^7.0.1",
+    "tsconfig-paths": "^3.8.0",
     "tslint": "^5.12.1",
-    "ts-node": "^7.0.1"
+    "tslint-microsoft-contrib": "^6.1.0"
   }
 }

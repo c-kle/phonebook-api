@@ -8,15 +8,12 @@ import {
   NotFoundError,
   Param,
   Post,
-  Put,
-  UseBefore } from "routing-controllers";
+  Put } from "routing-controllers";
 import { Service } from "typedi";
 import { Repository } from "typeorm";
 import {InjectRepository} from "typeorm-typedi-extensions";
-
-import { PhonebookEntryEntity } from "../entities/PhonebookEntryEntity";
-import { isDupKeyError, success } from "../shared";
-import { checkToken } from "../shared/token";
+import { PhonebookEntryEntity } from "@entities/PhonebookEntryEntity";
+import { isDupKeyError, success } from "@shared/utils";
 
 const makeSaveEntry = (repos: Repository<PhonebookEntryEntity>) => (newEntry: PhonebookEntryEntity) => (
   Promise
@@ -49,7 +46,6 @@ export class PhonebookController {
   }
 
   @Post("/entries")
-  @UseBefore(checkToken)
   public create(@Body() entry: PhonebookEntryEntity): Promise<PhonebookEntryEntity> {
     const saveEntry = makeSaveEntry(this.repository);
 
@@ -61,7 +57,6 @@ export class PhonebookController {
   }
 
   @Put("/entries/:id")
-  @UseBefore(checkToken)
   public update(@Param("id") id: string, @Body() entry: PhonebookEntryEntity): Promise<PhonebookEntryEntity> {
     const saveEntry = makeSaveEntry(this.repository);
     const updateEntry = () => (
@@ -82,7 +77,6 @@ export class PhonebookController {
   }
 
   @Delete("/entries/:id")
-  @UseBefore(checkToken)
   public delete(@Param("id") id: string): Promise<any> {
     const deleteEntry = () => this.repository.delete({ id });
 

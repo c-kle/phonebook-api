@@ -1,17 +1,18 @@
+import * as Redis from "ioredis";
 import { __, always, assoc, either, equals, ifElse, isNil, merge, not, pick, pipe, prop } from "ramda";
-import { Service } from "typedi";
+import { Inject, Service } from "typedi";
 import { Repository, Transaction, TransactionRepository } from "typeorm";
 import { InjectRepository } from "typeorm-typedi-extensions";
-import { UserEntity } from "../../entities/UserEntity";
-import { IAuthService } from "../../interfaces/IAuth.service";
-import { AuthTokenResource } from "../../resources/AuthTokenResource";
-import { BasicUserResource, toBasicUser, UserResource } from "../../resources/UserResource";
-import { PasswordHelper, PasswordObj } from "../../shared/PasswordHelper";
-import { authServiceToken } from "../../shared/serviceTokens";
-import { createToken } from "../../shared/token";
+import { UserEntity } from "@entities/UserEntity";
+import { IAuthService } from "@interfaces/IAuthService";
+import { AuthTokenResource } from "@resources/AuthTokenResource";
+import { BasicUserResource, toBasicUser, UserResource } from "@resources/UserResource";
+import { authServiceToken, redisToken } from "@shared/DITokens";
+import { PasswordHelper, PasswordObj } from "@modules/auth/AuthHelper";
+import { createToken } from "@shared/token";
 
 const createTokenFromUser = pipe<UserEntity, Partial<UserEntity>, string, AuthTokenResource>(
-  pick("id"),
+  pick(["id"]),
   createToken,
   assoc("token", __, {}),
 );
@@ -45,7 +46,9 @@ export class AuthService implements IAuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
-  ) {}
+    @Inject(redisToken)
+    private readonly redis: Redis.Redis,
+  ) { }
 
   @Transaction()
   public register(
@@ -72,4 +75,9 @@ export class AuthService implements IAuthService {
         ),
       );
   }
+
+  public logout(tokenObj: AuthTokenResource): Promise<any> {
+    return this.redis.set(`blacklist:${tokenObj.token}`, 1, "EX", 300, "NX");
+  }
+
 }

@@ -1,32 +1,23 @@
 import * as jwt from "jsonwebtoken";
-import { ifElse, last, pathOr, pipe, split } from "ramda";
-import { BadRequestError, UnauthorizedError } from "routing-controllers";
-import { isNotEmpty } from ".";
+import { ifElse } from "ramda";
+import { isNotNilNorEmpty } from "shared/utils";
 
 const SECRET = process.env.JWT_SECRET;
-const BEARER_STR = "Bearer ";
 
-export const checkToken = (req: any, res: any, next?: (err?: any) => any) => {
-  return pipe(
-    pathOr("", ["headers", "authorization"]),
-    split(BEARER_STR),
-    last,
-    ifElse(
-      isNotEmpty,
-      (token: string) => jwt.verify(token, SECRET, (err: Error, decoded: any) => {
-        if (err) {
-          res.status(401);
-          return res.send(new UnauthorizedError());
-        }
-        req.user = decoded;
-        return next();
-      }),
-      () => {
-        res.status(400);
-        return res.send(new BadRequestError("token is missing"));
-      },
-    ),
-  )(req);
-};
+const verifyToken = (token: string): Promise<any> => (
+  new Promise((resolve) => (
+    jwt.verify(token, SECRET,
+      (err: Error, decoded: any) => resolve(err ? null : { ...decoded, token }),
+    )
+  ))
+);
+
+export const decodeToken = (
+  ifElse<string, Promise<any>, Promise<any>>(
+    isNotNilNorEmpty,
+    verifyToken,
+    () => Promise.resolve(null),
+  )
+);
 
 export const createToken = (payloadObj: any) => jwt.sign({ ...payloadObj }, SECRET);

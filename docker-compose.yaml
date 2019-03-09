@@ -3,11 +3,13 @@ services:
   api:
     environment:
       JWT_SECRET: $JWT_SECRET
+      REDIS_URL: $REDIS_URL
     build: .
     volumes:
       - .:/app
     links:
       - "db:mysql"
+      - "redis:redis"
     expose:
       - 3000
     ports:
@@ -22,5 +24,12 @@ services:
       MYSQL_DATABASE: $TYPEORM_DATABASE
       MYSQL_USER: $TYPEORM_USERNAME
       MYSQL_PASSWORD: $TYPEORM_PASSWORD
-    expose:
-      - 3306
+    ports:
+      - "3306:3306"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - .docker-redis:/data
+    restart: always

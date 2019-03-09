@@ -1,7 +1,16 @@
 {
-  "baseUrl": ".",
   "compileOnSave": true,
   "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@modules/*": ["modules/*"],
+      "@resources/*": ["resources/*"],
+      "@interfaces/*": ["interfaces/*"],
+      "@controllers/*": ["controllers/*"],
+      "@middlewares/*": ["middlewares/*"],
+      "@entities/*": ["entities/*"]
+    },
     "outDir": "build",
     "module": "commonjs",
     "target": "es6",

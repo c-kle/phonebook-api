@@ -1,10 +1,10 @@
 import { Service } from "typedi";
 import { Repository } from "typeorm";
 import { InjectRepository } from "typeorm-typedi-extensions";
-import { UserEntity } from "../../entities/UserEntity";
-import { IUsersService } from "../../interfaces/IUsers.service";
-import { UserResource } from "../../resources/UserResource";
-import { usersServiceToken } from "../../shared/serviceTokens";
+import { UserEntity } from "@entities/UserEntity";
+import { IUsersService } from "@interfaces/IUsersService";
+import { UserResource } from "@resources/UserResource";
+import { usersServiceToken } from "@shared/DITokens";
 
 @Service(usersServiceToken)
 export class UsersService implements IUsersService {

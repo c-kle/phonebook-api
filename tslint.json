@@ -1,14 +1,14 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
-    "rules": {
-      "no-console": {
-        "severity": "warning"
-      },
-      "no-unused-variable": [true, {"ignore-pattern": "^_"}]
+  "rulesDirectory": [],
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint-microsoft-contrib/recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "no-console": {
+      "severity": "warning"
     },
-    "rulesDirectory": []
+    "no-unused-variable": [true, {"ignore-pattern": "^_"}]
+  }
 }
