@@ -1,5 +1,5 @@
 import { AuthTokenResource } from "@resources/AuthTokenResource";
-import { BasicUserResource, UserResource } from "@resources/UserResource";
+import { BasicUserResource, UserResource, CredentialsResource } from "@resources/UserResource";
 
 export interface IAuthService {
   /**
@@ -11,14 +11,21 @@ export interface IAuthService {
 
   /**
    * Logs the user in and generates the tokens
-   * @param user The user with the credentials to log in with
+   * @param credentials The credentials to log in with
    * @returns Object with tokens or null if login fails
    */
-  login(user: UserResource): Promise<AuthTokenResource|null>;
+  login(credentials: CredentialsResource): Promise<AuthTokenResource|null>;
 
   /**
    * Logs the user out and blacklists the token
-   * @param user The user with the credentials to login with
+   * @param accessToken the user's accessToken
    */
-  logout(tokenObj: AuthTokenResource): Promise<any>;
+  logout(accessToken: string): Promise<any>;
+
+  /**
+   * Refreshes the user's access token with the user's refreshToken
+   * @param refresToken The refresh token
+   * @param userId The user's id
+   */
+  refresToken(refresToken: string, userId: string): Promise<Pick<AuthTokenResource, "accessToken">>;
 }

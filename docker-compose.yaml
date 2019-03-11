@@ -26,6 +26,8 @@ services:
       MYSQL_PASSWORD: $TYPEORM_PASSWORD
     ports:
       - "3306:3306"
+    volumes:
+      - .docker-db:/data
   redis:
     image: redis:alpine
     ports:

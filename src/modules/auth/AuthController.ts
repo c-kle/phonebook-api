@@ -7,10 +7,11 @@ import {
   JsonController,
   Post,
   UnauthorizedError,
+  Param,
 } from "routing-controllers";
 import { Inject, Service } from "typedi";
-
 import { isNil, when } from "ramda";
+
 import { IAuthService } from "@interfaces/IAuthService";
 import { IUsersService } from "@interfaces/IUsersService";
 import { AuthTokenResource } from "@resources/AuthTokenResource";
@@ -76,6 +77,18 @@ export class AuthController {
   @Get("/logout")
   @HttpCode(204)
   public logout(@CurrentUser({ required: true }) tokenObj: AuthTokenResource): Promise<any> {
-    return this.service.logout(tokenObj);
+    return this.service.logout(tokenObj.accessToken);
+  }
+
+  @Post("/token/:userId")
+  public refreshToken(
+    @Param("userId") userId: string,
+    @Body({ required: true }) body: Pick<AuthTokenResource, "refreshToken"> & { userId: string }
+  ) {
+    const throwLoginRequired = () => Promise.reject(new UnauthorizedError("Login required"));
+
+    return this.service
+      .refresToken(body.refreshToken, userId)
+      .then(when(isNil, throwLoginRequired));
   }
 }

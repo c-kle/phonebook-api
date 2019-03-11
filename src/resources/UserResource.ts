@@ -9,9 +9,10 @@ export class UserResource extends BaseResource {
   public readonly email: string;
 
   @MinLength(8, { groups: [ REGISTRATION, LOGIN ] })
-  public readonly password?: string;
+  public readonly password: string;
 }
 
 export type BasicUserResource = Pick<UserResource, "email"|"id">;
+export type CredentialsResource = Pick<UserResource, "email"|"password">;
 
 export const toBasicUser = (user: Partial<UserResource>): BasicUserResource => ({ id: user.id, email: user.email });

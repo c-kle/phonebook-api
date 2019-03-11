@@ -21,11 +21,11 @@ export class PasswordHelper {
     };
   }
 
-  public genSalt(): PasswordHelper {
+  public genSalt(saltLength = SALT_LENGHT): PasswordHelper {
     this.salt = crypto
-      .randomBytes(Math.ceil(SALT_LENGHT / 2))
+      .randomBytes(Math.ceil(saltLength / 2))
       .toString("hex")
-      .slice(0, SALT_LENGHT);
+      .slice(0, saltLength);
 
     return this;
   }

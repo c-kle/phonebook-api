@@ -1,3 +1,4 @@
 export class AuthTokenResource {
-  public readonly token: string;
+  public readonly accessToken: string;
+  public readonly refreshToken: string;
 }
