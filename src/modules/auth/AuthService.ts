@@ -25,16 +25,16 @@ const prepareNewUser = (user: UserResource) => (
 );
 
 const wrongCredentials = (credsToCheck: CredentialsResource) => (credsToCheckWith: PasswordObj) => (
-  not(
-    equals(
-      credsToCheckWith.password,
-      new PasswordHelper()
-        .useSalt(credsToCheckWith.salt)
-        .hashPassword(credsToCheck.password)
-        .Password,
-    ),
-  )
+  not(equals(
+    credsToCheckWith.password,
+    new PasswordHelper()
+      .useSalt(credsToCheckWith.salt)
+      .hashPassword(credsToCheck.password)
+      .Password
+  ))
 );
+
+const getJwtClaimsFromUSer = pick(["id"]);
 
 @Service(authServiceToken)
 export class AuthService implements IAuthService {
@@ -60,7 +60,12 @@ export class AuthService implements IAuthService {
   }
 
   public login(user: CredentialsResource): Promise<AuthTokenResource|null> {
-    const createNewTokens = bind(this.tokenManager.createNewTokens, this.tokenManager);
+    const createNewTokens = (
+      compose<UserEntity, Partial<UserEntity>, AuthTokenResource>(
+        bind(this.tokenManager.createNewTokens, this.tokenManager),
+        getJwtClaimsFromUSer
+      )
+    );
 
     return this.usersRepository
       .findOne({ email: user.email }, { select: [ "salt", "password", "id" ] })
@@ -68,8 +73,8 @@ export class AuthService implements IAuthService {
         ifElse(
           either(isNil, wrongCredentials(user)),
           always(null),
-          createNewTokens,
-        ),
+          createNewTokens
+        )
       );
   }
 
@@ -78,20 +83,25 @@ export class AuthService implements IAuthService {
   }
 
   public refresToken(refresToken: string, userId: string): Promise<Pick<AuthTokenResource, "accessToken">> {
-    const createNewAccessToken = compose(
-      assoc("accessToken", __, {}),
-      bind(this.tokenManager.createAccessToken, this.tokenManager)
+    const isValidRefreshToken = (
+      both(
+        isNotNil,
+        where({ aud: equals("refresh"), id: equals(userId) })
+      )
     );
 
-    const tryRefreshToken = () => (
+    const createNewAccessToken = (
+      pipe(
+        getJwtClaimsFromUSer,
+        bind(this.tokenManager.createAccessToken, this.tokenManager),
+        assoc("accessToken", __, {})
+      )
+    );
+
+    const tryRefreshToken = (): Promise<Pick<AuthTokenResource, "accessToken">> => (
       this.usersRepository
         .findOne(userId)
         .then(when(isNotNil, createNewAccessToken))
-    );
-
-    const isValidRefreshToken = both(
-      isNotNil,
-      where({ aud: equals("refresh"), id: equals(userId) })
     );
 
     return this.tokenManager

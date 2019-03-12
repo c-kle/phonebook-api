@@ -21,6 +21,12 @@
     "url": "https://github.com/c-kle/phonebook-api/issues"
   },
   "homepage": "https://github.com/c-kle/phonebook-api#readme",
+  "nodemonConfig": {
+    "watch": ["src"],
+    "ext": "ts",
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "ts-node -r tsconfig-paths/register src/app.ts"
+  },
   "dependencies": {
     "@types/ioredis": "^4.0.9",
     "class-transformer-validator": "^0.6.0",

@@ -1,7 +1,8 @@
 import * as Redis from "ioredis";
 import * as jwt from "jsonwebtoken";
-import { ifElse, __, equals, } from "ramda";
+import { ifElse, __ } from "ramda";
 import { Inject, Service } from "typedi";
+
 import { redisToken, tokenManagerToken } from "@shared/DITokens";
 import { isNotNilNorEmpty } from "@shared/utils";
 
@@ -34,8 +35,10 @@ export class TokenManager {
   public tryDecodeToken(token: string): Promise<any> {
     const verifyToken = (accessToken: string): Promise<any> => (
       new Promise((resolve) => (
-        jwt.verify(accessToken, SECRET,
-          (err: Error, decoded: any) => resolve(err ? null : decoded),
+        jwt.verify(
+          accessToken,
+          SECRET,
+          (err: Error, decoded: any) => resolve(err ? null : decoded)
         )
       ))
     );
@@ -52,7 +55,8 @@ export class TokenManager {
   }
 
   public isBlackListed(token: string): Promise<boolean> {
-    return this.redis.get(`blacklist:${token}`)
-      .then(equals("1"));
+    return this.redis
+      .get(`blacklist:${token}`)
+      .then(isNotNilNorEmpty);
   }
 }
