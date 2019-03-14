@@ -28,7 +28,6 @@
     "exec": "ts-node -r tsconfig-paths/register src/app.ts"
   },
   "dependencies": {
-    "@types/ioredis": "^4.0.9",
     "class-transformer-validator": "^0.6.0",
     "ioredis": "^4.6.2",
     "jsonwebtoken": "8.4.0",
@@ -52,6 +51,7 @@
     "@types/koa-router": "^7.0.39",
     "@types/node": "^10.7.1",
     "@types/ramda": "github:types/npm-ramda#dist",
+    "@types/ioredis": "^4.0.9",
     "nodemon": "1.14.11",
     "ts-node": "^7.0.1",
     "tsconfig-paths": "^3.8.0",

@@ -1,8 +1,8 @@
 import { IsEmail, MinLength } from "class-validator";
 import { BaseResource } from "@resources/BaseResource";
 
-export const REGISTRATION = "registration";
-export const LOGIN = "login";
+export const REGISTRATION = "registration_validation";
+export const LOGIN = "login_validation";
 
 export class UserResource extends BaseResource {
   @IsEmail({}, { groups: [ REGISTRATION, LOGIN ] })

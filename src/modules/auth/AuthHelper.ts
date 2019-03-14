@@ -1,48 +1,47 @@
 import * as crypto from "crypto";
 import { __, pipe } from "ramda";
-import { UserEntity } from "@entities/UserEntity";
 
 const SALT_LENGHT = 16;
 
-export type PasswordObj = Pick<UserEntity, "salt"|"password">;
-
-export class PasswordHelper {
-  private salt = "";
-  private password = "";
-
+class PasswordContainer {
   public get Password(): string {
     return this.password;
   }
 
-  public get PasswordAndSalt(): PasswordObj {
+  public get PasswordAndSalt(): { password: string, salt: string } {
     return {
       password: this.password,
       salt: this.salt,
     };
   }
 
-  public genSalt(saltLength = SALT_LENGHT): PasswordHelper {
-    this.salt = crypto
-      .randomBytes(Math.ceil(saltLength / 2))
-      .toString("hex")
-      .slice(0, saltLength);
+  constructor(private readonly password: string, private readonly salt: string) {}
+}
 
-    return this;
-  }
+class PasswordHasher {
+  constructor(private readonly salt: string) {}
 
-  public useSalt(salt: string): PasswordHelper {
-    this.salt = salt;
-
-    return this;
-  }
-
-  public hashPassword(password: string): PasswordHelper {
-    this.password = pipe<string, crypto.Hmac, crypto.Hmac, string>(
+  public hash(password: string) {
+    return pipe<string, crypto.Hmac, crypto.Hmac, string, PasswordContainer>(
       (salt) => crypto.createHmac("sha512", salt),
       (hash) => hash.update(password),
       (hash) => hash.digest("hex"),
+      (hash) => new PasswordContainer(hash, this.salt),
     )(this.salt);
+  }
+}
 
-    return this;
+export class AuthHelper {
+  public static GEN_SALT(): PasswordHasher {
+    const salt = crypto
+      .randomBytes(Math.ceil(SALT_LENGHT / 2))
+      .toString("hex")
+      .slice(0, SALT_LENGHT);
+
+    return new PasswordHasher(salt);
+  }
+
+  public static USE_SALT(salt: string): PasswordHasher {
+    return new PasswordHasher(salt);
   }
 }

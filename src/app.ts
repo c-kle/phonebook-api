@@ -6,9 +6,9 @@ import { createKoaServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
 import { createConnection, useContainer as ormUseContainer } from "typeorm";
 
-import { PhonebookController } from "@controllers/PhonebookController";
 import { currentUserChecker } from "@middlewares/currentUserChecker";
 import { AuthController } from "@modules/auth/AuthController";
+import { PhonebookController } from "@modules/phonebook/PhonebookController";
 import { redisToken } from "@shared/DITokens";
 
 const MAX_RETRIES = 10;
@@ -19,8 +19,8 @@ ormUseContainer(Container);
 const app = createKoaServer({
   classTransformer: true,
   controllers: [
-    PhonebookController,
     AuthController,
+    PhonebookController,
   ],
   currentUserChecker,
   routePrefix: "/api",

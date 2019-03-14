@@ -1,6 +1,6 @@
 import { __, bind, always, either, equals, ifElse, isNil, merge, not, pick, pipe, prop, when, assoc, both, where, compose } from "ramda";
 import { Inject, Service } from "typedi";
-import { Repository, Transaction, TransactionRepository } from "typeorm";
+import { Repository } from "typeorm";
 import { InjectRepository } from "typeorm-typedi-extensions";
 
 import { UserEntity } from "@entities/UserEntity";
@@ -8,17 +8,22 @@ import { IAuthService } from "@interfaces/IAuthService";
 import { AuthTokenResource } from "@resources/AuthTokenResource";
 import { BasicUserResource, toBasicUser, UserResource, CredentialsResource } from "@resources/UserResource";
 import { authServiceToken, tokenManagerToken } from "@shared/DITokens";
-import { PasswordHelper, PasswordObj } from "@modules/auth/AuthHelper";
+import { AuthHelper } from "@modules/auth/AuthHelper";
 import { TokenManager } from "@shared/TokenManager";
 import { isNotNil } from "@shared/utils";
+import { ACRUDBaseService } from "@shared/ACRUDBaseService";
+
+type PasswordObj = Pick<UserEntity, "salt"|"password">;
 
 const prepareNewUser = (user: UserResource) => (
   pipe<UserResource, string, PasswordObj, Partial<UserEntity>, Partial<UserEntity>>(
     prop("password"),
-    (password: string) => new PasswordHelper()
-      .genSalt()
-      .hashPassword(password)
-      .PasswordAndSalt,
+    (password: string) => (
+      AuthHelper
+        .GEN_SALT()
+        .hash(password)
+        .PasswordAndSalt
+    ),
     merge(user),
     pick(["email", "password", "salt"]),
   )(user)
@@ -27,9 +32,9 @@ const prepareNewUser = (user: UserResource) => (
 const wrongCredentials = (credsToCheck: CredentialsResource) => (credsToCheckWith: PasswordObj) => (
   not(equals(
     credsToCheckWith.password,
-    new PasswordHelper()
-      .useSalt(credsToCheckWith.salt)
-      .hashPassword(credsToCheck.password)
+    AuthHelper
+      .USE_SALT(credsToCheckWith.salt)
+      .hash(credsToCheck.password)
       .Password
   ))
 );
@@ -37,25 +42,20 @@ const wrongCredentials = (credsToCheck: CredentialsResource) => (credsToCheckWit
 const getJwtClaimsFromUSer = pick(["id"]);
 
 @Service(authServiceToken)
-export class AuthService implements IAuthService {
+export class AuthService extends ACRUDBaseService<UserEntity> implements IAuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<UserEntity>,
     @Inject(tokenManagerToken)
     private readonly tokenManager: TokenManager,
-  ) { }
+  ) {
+    super(usersRepository);
+  }
 
-  @Transaction()
-  public register(
-    user: UserResource,
-    @TransactionRepository(UserEntity) userRepo?: Repository<UserEntity>,
-  ): Promise<BasicUserResource> {
-    return pipe<UserResource, Partial<UserEntity>, UserEntity, Promise<BasicUserResource>>(
+  public register(user: UserResource): Promise<BasicUserResource> {
+    return pipe<UserResource, Partial<UserEntity>, Promise<BasicUserResource>>(
       prepareNewUser,
-      (newUser) => userRepo.create(newUser),
-      (newUser) => userRepo
-        .save(newUser)
-        .then(toBasicUser),
+      (newUser) => this.create(newUser).then(toBasicUser)
     )(user);
   }
 
