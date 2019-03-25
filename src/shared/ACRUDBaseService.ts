@@ -3,7 +3,7 @@ import { BaseEntity } from "@entities/BaseEntity";
 import { pipe, clone } from "ramda";
 
 export abstract class ACRUDBaseService<TEntity extends BaseEntity> {
-  constructor(private readonly repository: Repository<TEntity>) { }
+  constructor(protected readonly repository: Repository<TEntity>) { }
 
   public find(): Promise<TEntity[]> {
     return this.repository.find();

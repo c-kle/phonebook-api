@@ -83,7 +83,7 @@ export class AuthController {
   @Post("/token/:userId")
   public refreshToken(
     @Param("userId") userId: string,
-    @Body({ required: true }) body: Pick<AuthTokenResource, "refreshToken"> & { userId: string }
+    @Body({ required: true }) body: Pick<AuthTokenResource, "refreshToken">
   ) {
     const throwLoginRequired = () => Promise.reject(new UnauthorizedError("Login required"));
 

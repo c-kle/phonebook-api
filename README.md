@@ -19,24 +19,40 @@ write at least one unit test and a functional test
 
 We strongly recommend you use frameworks to solve the challenge if you added frameworks to your hackajob profile. Try to use good practices for the application's architecture. Extra points are given for correct use of design patterns and programming principles.  
 
-
-## Setup
-
-The project uses mysql 5.7 as a database, so make sure to have the right mysql instance running.
-
-Edit the ormconfig.json configuration file so it has the database connection information (host, user, password, port).
-
 ## Run
 
-first run `npm install` and then `npm run start`
+### with docker and docker-compose
+
+- First, rename the `.env.default` file into `.env`
+- Then run `sh scripts/docker-start.sh`
+
+### or without docker
+
+- Make sure to have a redis and mysql5.7 instance running
+- Edit the `.env.default` *(do not rename it !)* file's content so that the following variables have the right value.
+
+```
+TYPEORM_HOST=             /// mysql host
+TYPEORM_USERNAME=         /// mysql username
+TYPEORM_PASSWORD=         /// mysql password
+TYPEORM_DATABASE=         /// mysql database
+REDIS_URL=                /// redis connection string
+```
+
+- Run `npm install`
+- Run `npm run start`
 
 ## Quick overview
 
- - GET /phonebook/entries
- - POST /phonebook/entries
- - PUT /phonebook/entries/{id}
- - DELETE /phonebook/entries/{id}
- - POST /users/auth/signUp
- - POST /users/auth/login
+- GET /api/phonebook/entries
+- POST /api/phonebook/entries `(*)`
+- PUT /api/phonebook/entries/{id} `(*)`
+- DELETE /api/phonebook/entries/{id} `(*)`
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/auth/logout `(*)`
+- POST /api/auth/token/{userId}
+
+`(*): bearer token required`
 
 The project has a very simple implementation of JWT for the authentication part (Bearer Schema).

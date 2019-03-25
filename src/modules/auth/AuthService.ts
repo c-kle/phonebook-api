@@ -1,22 +1,19 @@
 import { __, bind, always, either, equals, ifElse, isNil, merge, not, pick, pipe, prop, when, assoc, both, where, compose } from "ramda";
 import { Inject, Service } from "typedi";
-import { Repository } from "typeorm";
-import { InjectRepository } from "typeorm-typedi-extensions";
 
 import { UserEntity } from "@entities/UserEntity";
 import { IAuthService } from "@interfaces/IAuthService";
 import { AuthTokenResource } from "@resources/AuthTokenResource";
-import { BasicUserResource, toBasicUser, UserResource, CredentialsResource } from "@resources/UserResource";
-import { authServiceToken, tokenManagerToken } from "@shared/DITokens";
+import { BasicUserResource, toBasicUser, UserResource, CredentialsResource, PasswordObjResource } from "@resources/UserResource";
+import { authServiceToken, tokenManagerToken, usersServiceToken } from "@shared/DITokens";
 import { AuthHelper } from "@modules/auth/AuthHelper";
 import { TokenManager } from "@shared/TokenManager";
 import { isNotNil } from "@shared/utils";
-import { ACRUDBaseService } from "@shared/ACRUDBaseService";
+import { UsersService } from "@modules/users/UsersService";
 
-type PasswordObj = Pick<UserEntity, "salt"|"password">;
 
 const prepareNewUser = (user: UserResource) => (
-  pipe<UserResource, string, PasswordObj, Partial<UserEntity>, Partial<UserEntity>>(
+  pipe<UserResource, string, PasswordObjResource, Partial<UserEntity>, Partial<UserEntity>>(
     prop("password"),
     (password: string) => (
       AuthHelper
@@ -29,7 +26,7 @@ const prepareNewUser = (user: UserResource) => (
   )(user)
 );
 
-const wrongCredentials = (credsToCheck: CredentialsResource) => (credsToCheckWith: PasswordObj) => (
+const wrongCredentials = (credsToCheck: CredentialsResource) => (credsToCheckWith: PasswordObjResource) => (
   not(equals(
     credsToCheckWith.password,
     AuthHelper
@@ -42,20 +39,18 @@ const wrongCredentials = (credsToCheck: CredentialsResource) => (credsToCheckWit
 const getJwtClaimsFromUSer = pick(["id"]);
 
 @Service(authServiceToken)
-export class AuthService extends ACRUDBaseService<UserEntity> implements IAuthService {
+export class AuthService  implements IAuthService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>,
+    @Inject(usersServiceToken)
+    private readonly usersService: UsersService,
     @Inject(tokenManagerToken)
     private readonly tokenManager: TokenManager,
-  ) {
-    super(usersRepository);
-  }
+  ) { }
 
   public register(user: UserResource): Promise<BasicUserResource> {
     return pipe<UserResource, Partial<UserEntity>, Promise<BasicUserResource>>(
       prepareNewUser,
-      (newUser) => this.create(newUser).then(toBasicUser)
+      (newUser) => this.usersService.create(newUser).then(toBasicUser)
     )(user);
   }
 
@@ -67,8 +62,8 @@ export class AuthService extends ACRUDBaseService<UserEntity> implements IAuthSe
       )
     );
 
-    return this.usersRepository
-      .findOne({ email: user.email }, { select: [ "salt", "password", "id" ] })
+    return this.usersService
+      .findPasswordObjByEmail(user.email)
       .then(
         ifElse(
           either(isNil, wrongCredentials(user)),
@@ -99,8 +94,8 @@ export class AuthService extends ACRUDBaseService<UserEntity> implements IAuthSe
     );
 
     const tryRefreshToken = (): Promise<Pick<AuthTokenResource, "accessToken">> => (
-      this.usersRepository
-        .findOne(userId)
+      this.usersService
+        .findById(userId)
         .then(when(isNotNil, createNewAccessToken))
     );
 

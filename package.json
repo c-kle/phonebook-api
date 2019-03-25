@@ -6,10 +6,7 @@
     "lint": "tslint -p . -c tslint.json",
     "build": "tsc",
     "start": "ts-node -r tsconfig-paths/register src/app.ts",
-    "start:watch": "nodemon",
-    "docker:start": "docker-compose run --rm --service-ports -v $(pwd):/app api npm run start",
-    "docker:start:watch": "docker-compose run --service-ports --rm -v $(pwd):/app api npm run start:watch",
-    "docker:test": "docker-compose run -u root --rm -v $(pwd):/app api npm run test"
+    "start:watch": "nodemon"
   },
   "repository": {
     "type": "git",
